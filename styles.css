@@ -1,0 +1,395 @@
+/*
+  Folha de estilos principal para o roteiro de Buenos Aires – Janeiro 2026.
+  Este arquivo contém todas as declarações CSS originalmente embutidas no HTML
+  de referência. As variáveis CSS facilitam ajustes de cor e estilo, enquanto
+  classes utilitárias são usadas para interatividade (por exemplo, esconder horários).
+*/
+
+:root {
+  --bg: #f5f5f8;
+  --card: #ffffff;
+  --accent: #e53935;
+  --accent-soft: #ffebee;
+  --text-main: #222222;
+  --text-muted: #666666;
+  --border: #dddddd;
+}
+
+/* ------------------------------------------------------------------
+   Hero section
+   A large cover at the top of the page showing a user‑supplied photo
+   with an overlay. The overlay contains the main title, subtitle and
+   countdown, and uses a gradient to improve contrast. Adjust the
+   height as needed to better frame your photo. */
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 18px rgba(15, 10, 40, 0.08);
+}
+
+@media (max-width: 600px) {
+  .hero {
+    height: 220px;
+  }
+}
+
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero-content {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.55));
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px 24px;
+  color: #ffffff;
+}
+
+.hero-content h1 {
+  font-size: 2rem;
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+
+.hero-content .subtitle {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 8px;
+}
+
+.hero-content .countdown {
+  color: #ffe082;
+  font-size: 0.95rem;
+}
+
+/* ------------------------------------------------------------------
+   Day navigation bar
+   The nav bar lists each day and can be used to quickly jump around
+   the itinerary. It sticks beneath the hero on scroll and hides the
+   scrollbar for a cleaner appearance. */
+
+.day-nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 0 12px 0;
+  margin-bottom: 20px;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 10;
+  border-bottom: 1px solid var(--border);
+}
+.day-nav::-webkit-scrollbar {
+  display: none;
+}
+.day-nav .nav-item {
+  flex: 0 0 auto;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+  scroll-snap-align: start;
+}
+
+.day-nav .nav-item:hover,
+.day-nav .nav-item.active {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at top left, #fff, #f3f3ff);
+  color: var(--text-main);
+  padding: 24px;
+  line-height: 1.5;
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto 40px auto;
+}
+
+h1 {
+  font-size: 2.2rem;
+  margin-bottom: 8px;
+  color: var(--accent);
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 800px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 8px 18px rgba(15, 10, 40, 0.06);
+  border: 1px solid var(--border);
+  margin-bottom: 18px;
+}
+
+.card h2 {
+  font-size: 1.35rem;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card h3 {
+  font-size: 1rem;
+  margin: 10px 0 4px 0;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #f0f0ff;
+  font-size: 0.8rem;
+  color: #4a4a8a;
+  margin-right: 6px;
+}
+
+.info-list {
+  list-style: none;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.info-list li {
+  margin-bottom: 4px;
+}
+
+.day {
+  margin-bottom: 18px;
+  border-left: 4px solid var(--accent-soft);
+  padding-left: 12px;
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+  cursor: pointer; /* Indica que o cabeçalho é clicável */
+}
+
+.day-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.day-sub {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.schedule {
+  margin-top: 6px;
+  padding-left: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.schedule li {
+  margin-bottom: 6px;
+}
+
+.time {
+  font-weight: 600;
+  color: var(--accent);
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #eef7ff;
+  color: #336699;
+  margin-left: 4px;
+}
+
+.transport {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin-left: 18px;
+}
+
+.section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 8px 0 4px 0;
+}
+
+.tips-list {
+  font-size: 0.88rem;
+  list-style: disc;
+  padding-left: 18px;
+  color: var(--text-muted);
+}
+
+.tips-list li {
+  margin-bottom: 4px;
+}
+
+.highlight {
+  background: #fffde7;
+  border-radius: 10px;
+  padding: 8px 10px;
+  border: 1px solid #fff3b0;
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+
+a {
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+/* Classe utilitária para esconder elementos (usado no script) */
+.hidden {
+  display: none;
+}
+
+/* Contagem regressiva estilizada */
+.countdown {
+  font-size: 1rem;
+  color: var(--accent);
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+/* Ações interativas nos itens do roteiro */
+.item-actions {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.item-actions button {
+  background: var(--accent-soft);
+  border: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: var(--accent);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.item-actions button:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Item concluído */
+.completed {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+/* Exibição de notas pessoais */
+.note-display {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-left: 18px;
+  margin-top: 2px;
+}
+
+.note-display strong {
+  color: var(--accent);
+}
+
+/* ------------------------------------------------------------------
+   Diário de bordo
+   Esta seção exibe todas as notas salvas pelos usuários. Agrupa as
+   notas por dia e formata cada entrada de forma simples. */
+
+.diary-section .subtitle {
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.diary-entry {
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--border);
+  font-size: 0.88rem;
+}
+.diary-entry:last-child {
+  border-bottom: none;
+}
+.diary-entry .entry-day {
+  font-weight: 600;
+  color: var(--accent);
+  margin-right: 6px;
+}
+.diary-entry .entry-note {
+  color: var(--text-main);
+}
