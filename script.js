@@ -732,3 +732,252 @@ function initBackToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 }
+
+/**
+ * Inicializa o diário compartilhado via Supabase. Quando a URL e a
+ * anon key estão configuradas nas metas do HTML, o formulário de
+ * autenticação é exibido. Após login ou cadastro, o usuário pode
+ * salvar memórias que ficam disponíveis para o casal.
+ */
+function initCloudDiary() {
+  const notice = document.getElementById('cloud-diary-notice');
+  const authForm = document.getElementById('auth-form');
+  const logoutBtn = document.getElementById('logout-btn');
+  const area = document.getElementById('cloud-diary-area');
+  const feedback = document.getElementById('auth-feedback');
+  if (!notice || !authForm || !logoutBtn || !area || !feedback) return;
+
+  const enabled = setupSupabaseClient();
+  if (!enabled) {
+    // Mantém apenas o aviso de configuração.
+    authForm.classList.add('hidden');
+    area.classList.add('hidden');
+    return;
+  }
+
+  notice.textContent = 'Use e-mail e senha para entrar ou criar a conta do casal.';
+  authForm.classList.remove('hidden');
+  area.classList.add('hidden');
+
+  let authAction = 'login';
+  authForm.addEventListener('click', (ev) => {
+    if (ev.target && ev.target.dataset && ev.target.dataset.action) {
+      authAction = ev.target.dataset.action;
+    }
+  });
+
+  authForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const email = authForm.email.value.trim();
+    const password = authForm.password.value.trim();
+    if (!email || !password) return;
+    setFeedback(feedback, 'Conectando...');
+    try {
+      if (authAction === 'signup') {
+        const { error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) throw error;
+        setFeedback(feedback, 'Conta criada! Veja seu e-mail para confirmar (se necessário).');
+      } else {
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        setFeedback(feedback, 'Login realizado com sucesso.');
+      }
+    } catch (err) {
+      setFeedback(feedback, formatSupabaseError(err), true);
+    }
+  });
+
+  logoutBtn.addEventListener('click', async () => {
+    await supabaseClient.auth.signOut();
+    setFeedback(feedback, 'Sessão encerrada.');
+  });
+
+  supabaseClient.auth.getSession().then(({ data }) => {
+    updateAuthUI(data.session ? data.session.user : null);
+  });
+
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    updateAuthUI(session ? session.user : null);
+    if (session && session.user) {
+      loadCloudEntries();
+    } else {
+      clearCloudEntries();
+    }
+  });
+
+  initCloudEntryForm();
+}
+
+/**
+ * Lê as metas supabase-url e supabase-anon-key e inicializa o cliente.
+ *
+ * @returns {boolean} Verdadeiro se o cliente foi configurado.
+ */
+function setupSupabaseClient() {
+  const urlMeta = document.querySelector('meta[name="supabase-url"]');
+  const keyMeta = document.querySelector('meta[name="supabase-anon-key"]');
+  const url = urlMeta && urlMeta.content ? urlMeta.content.trim() : '';
+  const key = keyMeta && keyMeta.content ? keyMeta.content.trim() : '';
+  if (!url || !key) {
+    return false;
+  }
+  supabaseClient = createClient(url, key);
+  return true;
+}
+
+/**
+ * Atualiza a UI de autenticação com base no usuário atual.
+ *
+ * @param {object|null} user Usuário autenticado ou null
+ */
+function updateAuthUI(user) {
+  cachedUser = user;
+  const area = document.getElementById('cloud-diary-area');
+  const logoutBtn = document.getElementById('logout-btn');
+  const authForm = document.getElementById('auth-form');
+  const feedback = document.getElementById('auth-feedback');
+  if (!area || !logoutBtn || !authForm || !feedback) return;
+  if (user) {
+    authForm.classList.add('hidden');
+    logoutBtn.classList.remove('hidden');
+    area.classList.remove('hidden');
+    setFeedback(feedback, `Logado como ${user.email}`);
+  } else {
+    authForm.classList.remove('hidden');
+    logoutBtn.classList.add('hidden');
+    area.classList.add('hidden');
+    setFeedback(feedback, '');
+  }
+}
+
+/**
+ * Configura o formulário de criação de entradas na nuvem.
+ */
+function initCloudEntryForm() {
+  const form = document.getElementById('cloud-entry-form');
+  const feedback = document.getElementById('entry-feedback');
+  const refreshBtn = document.getElementById('refresh-entries');
+  if (!form || !feedback || !refreshBtn) return;
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    if (!supabaseClient || !cachedUser) {
+      setFeedback(feedback, 'Faça login para salvar na nuvem.', true);
+      return;
+    }
+    const dayInput = form.day.value.trim();
+    const note = form.note.value.trim();
+    const day = dayInput ? parseInt(dayInput, 10) : null;
+    if (!note) {
+      setFeedback(feedback, 'Escreva algo antes de salvar.', true);
+      return;
+    }
+    setFeedback(feedback, 'Salvando...');
+    try {
+      const payload = { note };
+      if (!Number.isNaN(day) && day !== null) payload.day = day;
+      const { error } = await supabaseClient.from('diary_entries').insert(payload);
+      if (error) throw error;
+      form.reset();
+      setFeedback(feedback, 'Memória salva na nuvem!');
+      await loadCloudEntries();
+    } catch (err) {
+      setFeedback(feedback, formatSupabaseError(err), true);
+    }
+  });
+
+  refreshBtn.addEventListener('click', async () => {
+    if (!cachedUser) {
+      setFeedback(feedback, 'Faça login para carregar as memórias.', true);
+      return;
+    }
+    await loadCloudEntries();
+  });
+}
+
+/**
+ * Busca e renderiza as entradas do diário armazenadas na tabela
+ * diary_entries do Supabase.
+ */
+async function loadCloudEntries() {
+  const list = document.getElementById('cloud-entry-list');
+  if (!list || !supabaseClient || !cachedUser) return;
+  list.innerHTML = '<p class="subtitle">Carregando entradas...</p>';
+  const { data, error } = await supabaseClient
+    .from('diary_entries')
+    .select('id, day, note, created_at')
+    .order('created_at', { ascending: false })
+    .limit(50);
+  if (error) {
+    list.innerHTML = `<p class="feedback error">${formatSupabaseError(error)}</p>`;
+    return;
+  }
+  renderCloudEntries(data || []);
+}
+
+/**
+ * Limpa a lista de entradas quando o usuário sai.
+ */
+function clearCloudEntries() {
+  const list = document.getElementById('cloud-entry-list');
+  if (list) list.innerHTML = '';
+}
+
+/**
+ * Renderiza a lista de entradas recuperadas do Supabase.
+ *
+ * @param {Array<Object>} entries Lista de entradas
+ */
+function renderCloudEntries(entries) {
+  const list = document.getElementById('cloud-entry-list');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!entries.length) {
+    list.innerHTML = '<p class="subtitle">Nenhuma memória na nuvem ainda.</p>';
+    return;
+  }
+  entries.forEach((entry) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'cloud-entry';
+    const header = document.createElement('div');
+    header.className = 'cloud-entry-header';
+    const dayLabel = document.createElement('span');
+    dayLabel.className = 'entry-day';
+    dayLabel.textContent = entry.day ? `Dia ${entry.day}` : 'Diário';
+    const dateLabel = document.createElement('span');
+    const date = entry.created_at ? new Date(entry.created_at) : null;
+    dateLabel.textContent = date ? date.toLocaleString('pt-BR') : '';
+    header.appendChild(dayLabel);
+    header.appendChild(dateLabel);
+    const note = document.createElement('p');
+    note.className = 'entry-note';
+    note.textContent = entry.note;
+    wrapper.appendChild(header);
+    wrapper.appendChild(note);
+    list.appendChild(wrapper);
+  });
+}
+
+/**
+ * Ajusta mensagens visuais de feedback.
+ *
+ * @param {HTMLElement} el Elemento de feedback
+ * @param {string} text Mensagem a ser exibida
+ * @param {boolean} isError Indica se a mensagem é de erro
+ */
+function setFeedback(el, text, isError = false) {
+  el.textContent = text || '';
+  el.classList.toggle('error', Boolean(isError));
+}
+
+/**
+ * Formata erros do Supabase de forma amigável.
+ *
+ * @param {Error|object} err Erro retornado pelo Supabase
+ * @returns {string} Mensagem para o usuário
+ */
+function formatSupabaseError(err) {
+  if (!err) return 'Erro desconhecido.';
+  if (typeof err.message === 'string') return err.message;
+  if (typeof err === 'string') return err;
+  return 'Não foi possível completar a ação.';
+}
