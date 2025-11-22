@@ -45,6 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initDayNavigation(dayCards);
   // Registra o service worker para disponibilizar o app offline
   registerServiceWorker();
+
+  // Inicializa tema claro/escuro e botão de alternância
+  initTheme();
+  // Inicializa botão flutuante “voltar ao topo”
+  initBackToTop();
+  // Cria botões de próximo dia nos cartões de itinerário
+  initNextDayButtons();
 });
 
 /**
@@ -57,14 +64,25 @@ function initCountdown() {
   if (!countdownEl) return;
   // Define o início da viagem (adapte se necessário)
   const target = new Date('2026-01-16T00:00:00-03:00');
-  const now = new Date();
-  const diff = target.getTime() - now.getTime();
-  if (diff > 0) {
-    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    countdownEl.textContent = `${days} ${days === 1 ? 'dia' : 'dias'}`;
-  } else {
-    countdownEl.textContent = 'a viagem já começou!';
+  function update() {
+    const now = new Date();
+    const diff = target.getTime() - now.getTime();
+    if (diff <= 0) {
+      countdownEl.textContent = 'A viagem já começou!';
+      return;
+    }
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const parts = [];
+    if (days > 0) parts.push(`${days} ${days === 1 ? 'dia' : 'dias'}`);
+    if (hours > 0) parts.push(`${hours}h`);
+    parts.push(`${minutes}min`);
+    countdownEl.textContent = parts.join(' ');
   }
+  update();
+  // Atualiza a cada minuto para reduzir processamento
+  setInterval(update, 60 * 1000);
 }
 
 /**
@@ -264,4 +282,79 @@ function registerServiceWorker() {
       console.error('Falha ao registrar service worker', err);
     });
   }
+}
+
+/**
+ * Define e alterna temas claro/escuro. O tema inicial considera a
+ * preferência do usuário (prefers-color-scheme) e qualquer valor salvo
+ * anteriormente no localStorage. A classe .theme-dark adicionada ao
+ * elemento <html> ativa tokens de cor alternativos definidos no CSS.
+ */
+function initTheme() {
+  const htmlEl = document.documentElement;
+  const toggleBtn = document.getElementById('theme-toggle');
+  if (!toggleBtn) return;
+  const stored = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  let theme = stored || (prefersDark ? 'dark' : 'light');
+  applyTheme(theme);
+  toggleBtn.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    theme = htmlEl.classList.contains('theme-dark') ? 'light' : 'dark';
+    applyTheme(theme);
+    localStorage.setItem('theme', theme);
+  });
+}
+
+function applyTheme(theme) {
+  const htmlEl = document.documentElement;
+  const toggleBtn = document.getElementById('theme-toggle');
+  if (theme === 'dark') {
+    htmlEl.classList.add('theme-dark');
+    if (toggleBtn) toggleBtn.textContent = '☀️';
+  } else {
+    htmlEl.classList.remove('theme-dark');
+    if (toggleBtn) toggleBtn.textContent = '🌙';
+  }
+}
+
+/**
+ * Mostra ou oculta o botão flutuante de voltar ao topo conforme o
+ * usuário rola a página. Quando clicado, faz scroll suave até o topo.
+ */
+function initBackToTop() {
+  const btn = document.getElementById('back-to-top');
+  if (!btn) return;
+  window.addEventListener('scroll', () => {
+    if (window.pageYOffset > 300) {
+      btn.classList.add('show');
+    } else {
+      btn.classList.remove('show');
+    }
+  });
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+/**
+ * Para cada cartão de dia, insere um botão que permite avançar
+ * diretamente para o próximo dia. O último cartão não recebe botão.
+ */
+function initNextDayButtons() {
+  const cards = document.querySelectorAll('.day-card');
+  cards.forEach((card, idx) => {
+    if (idx < cards.length - 1) {
+      const nextCard = cards[idx + 1];
+      const btn = document.createElement('button');
+      btn.className = 'next-day-btn';
+      btn.textContent = 'Próximo dia →';
+      btn.type = 'button';
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        nextCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      card.appendChild(btn);
+    }
+  });
 }

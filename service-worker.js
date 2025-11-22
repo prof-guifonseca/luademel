@@ -1,10 +1,12 @@
-const CACHE_NAME = 'honeymoon-cache-v1';
+const CACHE_NAME = 'honeymoon-cache-v2';
 const urlsToCache = [
   '/',
   '/index.html',
   '/styles.css',
   '/script.js',
   '/manifest.json',
+  '/ca-e-gui.webp',
+  '/ca-e-gui.jpg',
   '/icon-192.png',
   '/icon-512.png'
 ];

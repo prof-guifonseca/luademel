@@ -5,39 +5,90 @@
   classes utilitárias são usadas para interatividade (por exemplo, esconder horários).
 */
 
+/*
+  Paleta de cores e tokens de design
+  Definimos variáveis CSS para a versão clara por padrão. Estas podem ser
+  sobrescritas tanto por media queries (prefers-color-scheme: dark) quanto
+  pela classe .theme-dark no elemento <html>. Essa abordagem permite um
+  toggle de tema manual enquanto respeita as preferências do usuário.
+*/
 :root {
-  --bg: #f5f5f8;
+  /* Cores de fundo e superfícies */
+  --bg: #f8f4ef;
   --card: #ffffff;
-  --accent: #e53935;
-  --accent-soft: #ffebee;
-  --text-main: #222222;
-  --text-muted: #666666;
-  --border: #dddddd;
+  --nav-bg: rgba(248, 244, 239, 0.9);
+  /* Acentos e realces */
+  --accent: #e85d75;
+  --accent-soft: #fdecef;
+  /* Texto */
+  --text-main: #382b23;
+  --text-muted: #776a60;
+  /* Bordas e sombras */
+  --border: #e3dede;
+  --shadow: 0 8px 18px rgba(15, 10, 40, 0.06);
+}
+
+/* Dark mode tokens */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1f1b18;
+    --card: #29231f;
+    --nav-bg: rgba(31, 27, 24, 0.8);
+    --accent: #e5a38f;
+    --accent-soft: rgba(229, 163, 143, 0.2);
+    --text-main: #f5f3f1;
+    --text-muted: #c7bfb9;
+    --border: #3a332f;
+    --shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* Manual dark mode toggle via class on the html element */
+.theme-dark {
+  --bg: #1f1b18;
+  --card: #29231f;
+  --nav-bg: rgba(31, 27, 24, 0.8);
+  --accent: #e5a38f;
+  --accent-soft: rgba(229, 163, 143, 0.2);
+  --text-main: #f5f3f1;
+  --text-muted: #c7bfb9;
+  --border: #3a332f;
+  --shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
 }
 
 /* ------------------------------------------------------------------
    Hero section
    A large cover at the top of the page showing a user‑supplied photo
-   with an overlay. The overlay contains the main title, subtitle and
-   countdown, and uses a gradient to improve contrast. Adjust the
-   height as needed to better frame your photo. */
+   with an overlay. The overlay uses a combination of radial and linear
+   gradients to ensure text readability while preserving the underlying
+   image. The height increases on larger screens to better frame the
+   photo and allow for additional UI elements like the theme toggle. */
 
 .hero {
   position: relative;
   width: 100%;
-  height: 300px;
-  border-radius: 18px;
+  height: 400px;
+  border-radius: 24px;
   overflow: hidden;
-  margin-bottom: 24px;
-  box-shadow: 0 8px 18px rgba(15, 10, 40, 0.08);
+  margin-bottom: 32px;
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 900px) {
+  .hero {
+    height: 340px;
+  }
 }
 
 @media (max-width: 600px) {
   .hero {
-    height: 220px;
+    height: 260px;
+    border-radius: 20px;
   }
 }
 
+/* Ensure the hero image fills its container while maintaining its
+   aspect ratio. The object position centers the couple in the frame. */
 .hero-img {
   width: 100%;
   height: 100%;
@@ -45,32 +96,41 @@
   object-position: center;
 }
 
+/* The overlay on top of the hero photo. A combination of radial and
+   linear gradients adds depth and improves contrast for the text.
+   Padding is increased to give breathing room around the content. */
 .hero-content {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.55));
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 20px 24px;
+  padding: 24px 28px;
   color: #ffffff;
+  background:
+    radial-gradient(circle at 60% 20%, rgba(0, 0, 0, 0.0) 0%, rgba(0, 0, 0, 0.45) 70%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.7));
 }
 
+/* Typography within the hero section */
 .hero-content h1 {
-  font-size: 2rem;
-  margin-bottom: 4px;
+  font-size: 2.4rem;
+  line-height: 1.2;
+  margin-bottom: 6px;
   font-weight: 700;
 }
 
 .hero-content .subtitle {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.85);
-  margin-bottom: 8px;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 12px;
+  line-height: 1.4;
 }
 
 .hero-content .countdown {
-  color: #ffe082;
-  font-size: 0.95rem;
+  color: #ffe2ac;
+  font-size: 1.05rem;
+  font-weight: 500;
 }
 
 /* ------------------------------------------------------------------
@@ -79,19 +139,23 @@
    the itinerary. It sticks beneath the hero on scroll and hides the
    scrollbar for a cleaner appearance. */
 
+/* Sticky navigation bar for the days. It gains a translucent backdrop and
+   blur effect to remain legible over the itinerary as you scroll. */
 .day-nav {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   overflow-x: auto;
-  padding: 8px 0 12px 0;
-  margin-bottom: 20px;
+  padding: 12px 0;
+  margin-bottom: 24px;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
   position: sticky;
   top: 0;
-  background: var(--bg);
-  z-index: 10;
+  background: var(--nav-bg);
+  backdrop-filter: blur(8px);
+  z-index: 20;
   border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 .day-nav::-webkit-scrollbar {
   display: none;
@@ -100,20 +164,26 @@
   flex: 0 0 auto;
   background: var(--accent-soft);
   color: var(--accent);
-  border-radius: 999px;
-  padding: 4px 14px;
-  font-size: 0.85rem;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
   scroll-snap-align: start;
+  line-height: 1.2;
 }
-
 .day-nav .nav-item:hover,
+.day-nav .nav-item:focus-visible {
+  background: var(--accent);
+  color: var(--card);
+  outline: none;
+  transform: translateY(-1px);
+}
 .day-nav .nav-item.active {
   background: var(--accent);
-  color: #ffffff;
+  color: var(--card);
 }
 
 * {
@@ -123,79 +193,101 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at top left, #fff, #f3f3ff);
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
   color: var(--text-main);
   padding: 24px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
+/* Container that constrains the width of the itinerary and centers it */
 .page {
   max-width: 1100px;
-  margin: 0 auto 40px auto;
+  margin: 0 auto 48px auto;
+  padding: 0 16px;
 }
 
 h1 {
-  font-size: 2.2rem;
-  margin-bottom: 8px;
+  font-size: 2rem;
+  margin-bottom: 12px;
   color: var(--accent);
+  line-height: 1.25;
 }
 
 .subtitle {
   font-size: 0.95rem;
   color: var(--text-muted);
-  margin-bottom: 18px;
+  margin-bottom: 20px;
+  line-height: 1.5;
 }
 
+/* Badges summarising logistics like hotel, período etc. */
 .badge-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 18px;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
 .badge {
-  padding: 4px 10px;
+  padding: 6px 14px;
   border-radius: 999px;
   background: var(--accent-soft);
   color: var(--accent);
   font-size: 0.8rem;
   font-weight: 600;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
+.badge:hover,
+.badge:focus-visible {
+  background: var(--accent);
+  color: var(--card);
+  outline: none;
+}
+
+/* Grid layout for the summary section; spacing increased for breathing room */
 .grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 24px;
+  margin-bottom: 32px;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .grid {
     grid-template-columns: 1fr;
   }
 }
 
+/* Generic card component used for summaries, tips and days. Rounded
+   corners, generous padding and subtle shadow improve legibility. */
 .card {
   background: var(--card);
-  border-radius: 16px;
-  padding: 16px 18px;
-  box-shadow: 0 8px 18px rgba(15, 10, 40, 0.06);
+  border-radius: 20px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
   border: 1px solid var(--border);
-  margin-bottom: 18px;
+  margin-bottom: 24px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(15, 10, 40, 0.08);
 }
 
 .card h2 {
-  font-size: 1.35rem;
-  margin-bottom: 8px;
+  font-size: 1.5rem;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .card h3 {
-  font-size: 1rem;
-  margin: 10px 0 4px 0;
+  font-size: 1.15rem;
+  margin: 12px 0 6px 0;
 }
 
 .pill {
@@ -220,69 +312,81 @@ h1 {
   margin-bottom: 4px;
 }
 
+/* Wrapper for each day's schedule. A subtle accent line guides the eye down the list. */
 .day {
-  margin-bottom: 18px;
-  border-left: 4px solid var(--accent-soft);
-  padding-left: 12px;
+  margin-bottom: 24px;
+  border-left: 4px solid var(--accent);
+  padding-left: 16px;
 }
 
+/* Header of each day card. It's clickable to toggle the schedule. */
 .day-header {
   display: flex;
   justify-content: space-between;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 4px;
-  cursor: pointer; /* Indica que o cabeçalho é clicável */
+  margin-bottom: 6px;
+  cursor: pointer;
 }
 
+/* Title and subtitle of each day */
 .day-title {
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
 }
 
 .day-sub {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
+  line-height: 1.4;
 }
 
+/* The list of time slots for each day */
 .schedule {
-  margin-top: 6px;
+  margin-top: 8px;
   padding-left: 0;
   list-style: none;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 
+/* Each schedule item has spacing beneath for readability */
 .schedule li {
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
+/* Time label preceding each schedule entry */
 .time {
   font-weight: 600;
   color: var(--accent);
-  margin-right: 4px;
+  margin-right: 6px;
   white-space: nowrap;
+  font-size: 0.9rem;
 }
 
+/* Tags used to annotate schedule items */
 .tag {
   display: inline-block;
   font-size: 0.75rem;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 999px;
   background: #eef7ff;
   color: #336699;
-  margin-left: 4px;
+  margin-left: 6px;
 }
 
+/* Additional transport notes below schedule items */
 .transport {
-  font-size: 0.84rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
-  margin-left: 18px;
+  margin-left: 24px;
+  line-height: 1.4;
 }
 
+/* Section titles used within cards (e.g. Dicas rápidas) */
 .section-title {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  margin: 8px 0 4px 0;
+  margin: 12px 0 6px 0;
 }
 
 .tips-list {
@@ -296,13 +400,15 @@ h1 {
   margin-bottom: 4px;
 }
 
+/* Highlights call out important details or warnings */
 .highlight {
-  background: #fffde7;
-  border-radius: 10px;
-  padding: 8px 10px;
-  border: 1px solid #fff3b0;
-  font-size: 0.9rem;
-  margin-top: 6px;
+  background: #fff9e6;
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1px solid #f7eab7;
+  font-size: 0.93rem;
+  margin-top: 8px;
+  color: #675c3d;
 }
 
 a {
@@ -363,6 +469,115 @@ a {
 
 .note-display strong {
   color: var(--accent);
+}
+
+/* ------------------------------------------------------------------
+   Custom additions
+   Additional utility classes and components added for the upgraded
+   itinerary, including the special trip section, theme toggle button,
+   back‑to‑top control and site footer styling.
+*/
+
+/* Special trip section uses the generic card styling plus a left
+   accent bar to draw attention to why the trip is meaningful. */
+.special-trip {
+  border-left: 4px solid var(--accent);
+}
+
+/* Theme toggle button positioned in the hero overlay. Appears as a
+   circular chip with a changing icon (sun/moon) handled via JS. */
+.theme-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+  transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
+}
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  background: var(--accent);
+  color: var(--card);
+  transform: rotate(20deg);
+  outline: none;
+}
+
+/* Floating back‑to‑top button. Hidden by default and shown via JS
+   when the user scrolls down the page. */
+.back-to-top {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: var(--card);
+  font-size: 1.5rem;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  z-index: 30;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.back-to-top.show {
+  display: flex;
+}
+.back-to-top:hover,
+.back-to-top:focus-visible {
+  transform: translateY(-2px);
+  outline: none;
+}
+
+/* Site footer with subtle border and centered text */
+.site-footer {
+  margin-top: 48px;
+  padding: 24px 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+.site-footer span {
+  color: var(--accent);
+}
+
+/* Button that advances to the next day. Placed at the end of each day card. */
+.next-day-btn {
+  margin-top: 16px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--card);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--shadow);
+}
+.next-day-btn:hover,
+.next-day-btn:focus-visible {
+  background: var(--accent-soft);
+  color: var(--accent);
+  transform: translateY(-2px);
+  outline: none;
 }
 
 /* ------------------------------------------------------------------

@@ -2,13 +2,20 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <!-- Mobile‑first meta tag to ensure proper scaling on handheld devices -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Roteiro Buenos Aires – Jan 2026</title>
+  <!-- Preconnect hints for Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Import a modern sans‑serif font for better legibility -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet" />
   <!-- Folha de estilos externa -->
   <link rel="stylesheet" href="styles.css" />
   <!-- Manifesto para PWA -->
-  <link rel="manifest" href="manifest.json">
-  <!-- Tema do navegador -->
-  <meta name="theme-color" content="#e53935" />
+  <link rel="manifest" href="manifest.json" />
+  <!-- Theme color will be overwritten by CSS variables; kept here for PWA splash screens -->
+  <meta name="theme-color" content="#e85d75" />
 </head>
   <body>
     <!-- Hero section with our photo and trip overview. The image file
@@ -17,10 +24,16 @@
          This hero sets the tone for the page and contains the title,
          subtitle and countdown to the trip. -->
     <header class="hero">
-      <!-- User supplied photo. Use object-fit to cover the hero area. -->
-      <img src="ca-e-gui.jpg" alt="Foto de Carina e Gui" class="hero-img">
+      <!-- User supplied photo rendered via a responsive picture element. A modern
+           WebP version is preferred with JPEG fallback for older browsers. -->
+      <picture>
+        <source type="image/webp" srcset="ca-e-gui.webp" />
+        <img src="ca-e-gui.jpg" alt="Foto de casal sorrindo em frente a uma fonte" class="hero-img" />
+      </picture>
       <!-- Overlay with gradient and text -->
       <div class="hero-content">
+        <!-- Theme toggle button; updated dynamically in script.js with sun/moon -->
+        <button id="theme-toggle" class="theme-toggle" aria-label="Alternar tema">🌙</button>
         <h1>Roteiro Buenos Aires – Janeiro 2026</h1>
         <p class="subtitle">
           Carina &amp; Gui • 6 dias completos na cidade + bate‑volta a Colonia (Uruguai) e Tigre • Estilo leve, econômico e bem organizado.
@@ -33,7 +46,7 @@
 
     <!-- Day navigation. Populated dynamically in script.js based on the
          existing day cards. Clicking a day scrolls to that section. -->
-    <nav id="day-nav" class="day-nav"></nav>
+    <nav id="day-nav" class="day-nav" aria-label="Navegação de dias"></nav>
 
     <div class="page">
 
@@ -43,6 +56,16 @@
       <span class="badge">Voos LATAM • apenas bagagem de mão</span>
       <span class="badge">Deslocamento: a pé, Uber, metrô e trem</span>
     </div>
+
+    <!-- Seção destacando porque a viagem é especial -->
+    <section class="card special-trip">
+      <h2>💖 Por que esta viagem é especial</h2>
+      <p>
+        Porque é a nossa primeira grande aventura INTERNACIONAL a dois! Vamos celebrar a vida,
+        experimentar sabores, caminhar de mãos dadas por ruas históricas e
+        colecionar memórias que vão nos acompanhar para sempre.
+      </p>
+    </section>
 
     <!-- A contagem regressiva agora vive dentro do hero. Esse espaço
          anteriormente exibido foi removido para evitar conteúdo duplicado. -->
@@ -429,7 +452,17 @@
 
   </div>
 
+  <!-- Botão flutuante “Voltar ao topo” -->
+  <button id="back-to-top" class="back-to-top" aria-label="Voltar ao topo">↑</button>
+
   <!-- Script externo para interatividade -->
   <script src="script.js"></script>
+
+  <!-- Rodapé personalizado -->
+  <footer class="site-footer">
+    <p>
+      Com amor, Carina &amp; Gui – Janeiro 2026 <span aria-hidden="true">❤️</span>
+    </p>
+  </footer>
 </body>
 </html>
