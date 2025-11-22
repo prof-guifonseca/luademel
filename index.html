@@ -44,9 +44,9 @@
       </div>
     </header>
 
-    <!-- Day navigation. Populated dynamically in script.js based on the
-         existing day cards. Clicking a day scrolls to that section. -->
-    <nav id="day-nav" class="day-nav" aria-label="Navegação de dias"></nav>
+    <!-- As abas serão inseridas dinamicamente dentro da seção principal (page).
+         A barra original de navegação foi movida para junto do conteúdo
+         principal logo após o resumo geral.  -->
 
     <div class="page">
 
@@ -106,6 +106,13 @@
         </ul>
       </div>
     </div>
+
+    <!-- Navegação em abas (tabs) e contêiner de painéis. Esta barra
+         fica logo após o resumo geral para que a visão geral da
+         viagem seja apresentada antes dos detalhes de cada dia. O
+         conteúdo será populado via JavaScript. -->
+    <nav id="tab-list" class="day-nav tab-list" role="tablist" aria-label="Navegação de dias e diário"></nav>
+    <div id="tab-panels" class="tab-panels"></div>
 
     <!-- Dia 1 -->
     <div class="card day-card" data-day="1">

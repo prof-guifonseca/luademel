@@ -542,6 +542,63 @@ a {
   outline: none;
 }
 
+/* ------------------------------------------------------------------
+   Layout para abas (tabs)
+   As abas utilizam a mesma barra horizontal existente (.day-nav), mas
+   os painéis associados são inseridos no contêiner .tab-panels. Cada
+   painel é oculto por padrão e exibido quando possui a classe
+   .active ou quando o atributo hidden é removido. */
+
+/* Contêiner dos painéis de abas. Mantém espaçamento superior para
+   separá-lo da barra de abas. */
+.tab-panels {
+  margin-top: 16px;
+}
+
+/* Painel de aba (tabpanel) escondido por padrão. */
+.tab-panel {
+  display: none;
+}
+.tab-panel.active {
+  display: block;
+}
+
+/* Navegação entre dias dentro de um painel. Os botões são
+   apresentados lado a lado e centralizados. */
+.tab-day-nav {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Botão de dia anterior. Segue o mesmo estilo do botão de próximo dia
+   com orientações invertidas. */
+.prev-day-btn {
+  margin-top: 16px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--card);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--shadow);
+}
+.prev-day-btn:hover,
+.prev-day-btn:focus-visible {
+  background: var(--accent-soft);
+  color: var(--accent);
+  transform: translateY(-2px);
+  outline: none;
+}
+
 /* Site footer with subtle border and centered text */
 .site-footer {
   margin-top: 48px;
